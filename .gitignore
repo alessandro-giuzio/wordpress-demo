@@ -1,0 +1,44 @@
+# Environment files
+.env
+
+# WordPress core files (we're using Docker)
+wp-admin/
+wp-includes/
+wp-*.php
+xmlrpc.php
+index.php
+.htaccess
+wp-config.php
+
+# WordPress content (keep custom plugins and themes)
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/cache/
+wp-content/backups/
+
+# Plugin and theme dependencies
+node_modules/
+vendor/
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker volumes
+docker-data/
