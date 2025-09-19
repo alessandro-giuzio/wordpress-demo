@@ -1,0 +1,20 @@
+# Ignore everything by default
+*
+
+# Always keep this file and a readme if you add one
+!.gitignore
+!readme.md
+
+# Allow plugins and themes (and all their contents)
+!plugins/
+!plugins/**
+
+!themes/
+!themes/**
+
+# Ignore editor/OS junk
+.DS_Store
+Thumbs.db
+.vscode/
+node_modules/
+vendor/
