@@ -12,6 +12,11 @@
  * text-domain: prefix-plugin-name
  */
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 // Functions
 function pluginprefix_activate()
 {
@@ -23,10 +28,6 @@ function pluginprefix_deactivate()
   error_log('🛑 Gallery Plugin Deactivated');
 }
 
-// Activation
+// Register activation and deactivation hooks
 register_activation_hook(__FILE__, 'pluginprefix_activate');
-// Deactivation
-register_deactivation_hook(
-  __FILE__,
-  'pluginprefix_deactivate'
-);
+register_deactivation_hook(__FILE__, 'pluginprefix_deactivate');
