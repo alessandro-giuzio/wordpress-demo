@@ -149,3 +149,23 @@ function save_company_meta($post_id)
   }
 }
 add_action('save_post', 'save_company_meta');
+
+
+// meta box for name
+function add_name_meta_box()
+{
+  add_meta_box(
+    'name_meta_box',          // Unique ID
+    'Name',                   // Box title
+    'name_meta_box_html',     // Content callback, must be of type callable
+    'testimonial'                // Post type
+  );
+}
+// Add the meta box
+add_action('add_meta_boxes', 'add_name_meta_box');
+
+function name_meta_box_html($post)
+{
+  $name = get_post_meta($post->ID, '_name', true);
+}
+  // Display the field
