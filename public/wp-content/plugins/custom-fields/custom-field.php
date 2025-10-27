@@ -34,7 +34,7 @@ function custom_fields_deactivate()
   delete_option('custom_fields_show_welcome');
 }
 
-// Register new post type
+
 // Register Custom Post Type
 function custom_post_type()
 {
@@ -90,3 +90,62 @@ function custom_post_type()
   register_post_type('testimonial', $args);
 }
 add_action('init', 'custom_post_type', 0);
+// meta box for company name
+function add_company_meta_box()
+{
+  add_meta_box(
+    'company_meta_box',          // Unique ID
+    'Company',                   // Box title
+    'company_meta_box_html',     // Content callback, must be of type callable
+    'testimonial'                // Post type
+  );
+}
+// Add the meta box
+add_action('add_meta_boxes', 'add_company_meta_box');
+function company_meta_box_html($post)
+{
+  // Add security nonce
+  wp_nonce_field('save_company_meta', 'company_nonce');
+
+  // Get existing value
+  $company = get_post_meta($post->ID, '_company', true);
+
+  // Display the field
+?>
+  <p>
+    <label for="company">Company Name:</label><br>
+    <input type="text"
+      id="company"
+      name="company"
+      value="<?php echo esc_attr($company); ?>"
+      size="50" />
+  </p>
+<?php
+}
+
+// Save the company field when the post is saved
+function save_company_meta($post_id)
+{
+  // Security checks
+  if (
+    !isset($_POST['company_nonce']) ||
+    !wp_verify_nonce($_POST['company_nonce'], 'save_company_meta')
+  ) {
+    return;
+  }
+
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+    return;
+  }
+
+  if (!current_user_can('edit_post', $post_id)) {
+    return;
+  }
+
+  // Save the company field
+  if (isset($_POST['company'])) {
+    $company = sanitize_text_field($_POST['company']);
+    update_post_meta($post_id, '_company', $company);
+  }
+}
+add_action('save_post', 'save_company_meta');
