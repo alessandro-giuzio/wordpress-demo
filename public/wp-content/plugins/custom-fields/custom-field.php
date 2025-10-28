@@ -166,6 +166,43 @@ add_action('add_meta_boxes', 'add_name_meta_box');
 
 function name_meta_box_html($post)
 {
+  wp_nonce_field('save_name_meta', 'name_nonce');
   $name = get_post_meta($post->ID, '_name', true);
-}
   // Display the field
+?>
+  <p>
+    <label for="name">User Name:</label>
+    <input type="text"
+      id="name"
+      name="name"
+      value="<?php echo esc_attr($name); ?>"
+      size="50" />
+
+  </p>
+<?php
+}
+function save_name_meta($post_id)
+{
+  // Security checks
+  if (
+    !isset($_POST['name_nonce']) ||
+    !wp_verify_nonce($_POST['name_nonce'], 'save_name_meta')
+  ) {
+    return;
+  }
+
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+    return;
+  }
+
+  if (!current_user_can('edit_post', $post_id)) {
+    return;
+  }
+
+  // Save the name field
+  if (isset($_POST['name'])) {
+    $name = sanitize_text_field($_POST['name']);
+    update_post_meta($post_id, '_name', $name);
+  }
+}
+add_action('save_post', 'save_name_meta');
