@@ -11,16 +11,23 @@ if (have_posts()) :
     // Show custom fields (if you have them)
     $name = get_post_meta(get_the_ID(), '_name', true);
     $company = get_post_meta(get_the_ID(), '_company', true);
+    $job = get_post_meta(get_the_ID(), '_job', true);
 
     if ($name) {
-      echo '<p><strong>Name:</strong> ' . esc_html($name) . '</p>';
+      echo '<div class="testimonial-meta">';
+      echo '<p class="testimonial-name"><strong>Name:</strong> ' . esc_html($name) . '</p>';
     }
     if ($company) {
-      echo '<p><strong>Company:</strong> ' . esc_html($company) . '</p>';
+      echo '<p class="testimonial-company"><strong>Company:</strong> ' . esc_html($company) . '</p>';
     }
+    if ($job) {
+      echo '<p class="testimonial-job"><strong>Job:</strong> ' . esc_html($job) . '</p>';
+    }
+    echo '</div>';
   endwhile;
 else :
   echo '<p>No testimonial found.</p>';
 endif;
+echo '</div>';
 
-get_footer();
+get_footer(name: 'testimonial');

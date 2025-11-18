@@ -6,17 +6,24 @@
 
 */
 
+// Register plugin activation hook
 register_activation_hook(__FILE__, 'custom_fields_activate');
 
-// Activation function
 
+/**
+ * Runs when plugin is activated.
+ * You can use this to set up options or do other setup tasks.
+ */
 function custom_fields_activate()
 {
   // Add a welcome message that shows once
   add_option('custom_fields_show_welcome', true);
 }
 
-// Register Custom Post Type
+/**
+ * Register the 'testimonial' custom post type.
+ * This makes a new post type available in WordPress admin.
+ */
 function custom_post_type()
 {
   $labels = array(
@@ -71,7 +78,10 @@ function custom_post_type()
 }
 add_action('init', 'custom_post_type', 0);
 
-// One meta box for both fields
+/**
+ * Add a meta box for custom testimonial fields.
+ * This box will appear on the testimonial edit screen.
+ */
 function custom_fields_add_testimonial_meta_box()
 {
   add_meta_box(
@@ -83,7 +93,10 @@ function custom_fields_add_testimonial_meta_box()
 }
 add_action('add_meta_boxes', 'custom_fields_add_testimonial_meta_box');
 
-// Render both fields in one meta box
+/**
+ * Render the meta box HTML for custom fields.
+ * This function outputs the form fields for name and company.
+ */
 function custom_fields_testimonial_meta_box_html($post)
 {
   // Add security nonce
@@ -92,29 +105,43 @@ function custom_fields_testimonial_meta_box_html($post)
   // Get existing values
   $company = get_post_meta($post->ID, '_company', true);
   $name = get_post_meta($post->ID, '_name', true);
+  $job = get_post_meta($post->ID, '_job', true);
 
   // Display the fields
 ?>
-  <p>
-    <label for="name">User Name:</label>
-    <input type="text"
-      id="name"
-      name="name"
-      value="<?php echo esc_attr($name); ?>"
-      size="50" />
-  </p>
-  <p>
-    <label for="company">Company Name:</label>
-    <input type="text"
-      id="company"
-      name="company"
-      value="<?php echo esc_attr($company); ?>"
-      size="50" />
-  </p>
+  <div>
+    <p>
+      <label for="name">User Name:</label>
+      <input type="text"
+        id="name"
+        name="name"
+        value="<?php echo esc_attr($name); ?>"
+        size="50" />
+    </p>
+    <p>
+      <label for="company">Company Name:</label>
+      <input type="text"
+        id="company"
+        name="company"
+        value="<?php echo esc_attr($company); ?>"
+        size="50" />
+    </p>
+    <p>
+      <label for="job">Job:</label>
+      <input type="text"
+        id="job"
+        name="job"
+        value="<?php echo esc_attr($job); ?>"
+        size="50" />
+    </p>
+  </div>
 <?php
 }
 
-// Save both fields when the post is saved
+/**
+ * Save the custom field values when a testimonial is saved.
+ * This function runs when you save or update a testimonial post.
+ */
 function custom_fields_save_testimonial_meta($post_id)
 {
   // Only run for 'testimonial' post type
@@ -149,5 +176,27 @@ function custom_fields_save_testimonial_meta($post_id)
     $company = sanitize_text_field($_POST['company']);
     update_post_meta($post_id, '_company', $company);
   }
+  // Save the job field if present
+  if (isset($_POST['job'])) {
+    $job = sanitize_text_field($_POST['job']);
+    update_post_meta($post_id, '_job', $job);
+  }
 }
 add_action('save_post', 'custom_fields_save_testimonial_meta');
+/**
+ *  Custom admin CSS for the meta box
+ */
+function custom_fields_admin_styles($hook)
+{
+  global $post;
+  // Only load on testimonial post edit screen
+  if ($hook === 'post.php' || $hook === 'post-new.php') {
+    if (isset($post) && $post->post_type === 'testimonial') {
+      wp_enqueue_style(
+        'custom-fields-admin-style',
+        plugin_dir_url(__FILE__) . 'admin-style.css'
+      );
+    }
+  }
+}
+add_action('admin_enqueue_scripts', 'custom_fields_admin_styles');

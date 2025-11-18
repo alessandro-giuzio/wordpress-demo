@@ -1,0 +1,22 @@
+/* admin-style.css */
+#custom_fields_testimonial_meta_box {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+#custom_fields_testimonial_meta_box label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+#custom_fields_testimonial_meta_box input[type='text'] {
+  width: 80%;
+  padding: 6px;
+  margin-bottom: 12px;
+  border: 1px solid black;
+  border-radius: 4px;
+  background: white;
+}
