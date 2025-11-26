@@ -10,6 +10,28 @@
 register_activation_hook(__FILE__, 'custom_fields_activate');
 
 
+// Register a REST API endpoint for testimonial custom fields
+add_action('rest_api_init', 'register_testimonial_custom_fields_endpoint');
+
+function register_testimonial_custom_fields_endpoint()
+{
+  register_rest_route('testimonial/v1', '/fields/(?P<id>\d+)', array(
+    'methods'  => 'GET',
+    'callback' => 'get_testimonial_custom_fields',
+  ));
+}
+
+function get_testimonial_custom_fields($data)
+{
+  $post_id = $data['id'];
+  return array(
+    'name'    => get_post_meta($post_id, '_name', true),
+    'company' => get_post_meta($post_id, '_company', true),
+    'job'     => get_post_meta($post_id, '_job', true),
+    'rating'  => get_post_meta($post_id, '_rating', true),
+  );
+}
+
 /**
  * Runs when plugin is activated.
  * You can use this to set up options or do other setup tasks.
@@ -106,6 +128,7 @@ function custom_fields_testimonial_meta_box_html($post)
   $company = get_post_meta($post->ID, '_company', true);
   $name = get_post_meta($post->ID, '_name', true);
   $job = get_post_meta($post->ID, '_job', true);
+  $rating = get_post_meta($post->ID, '_rating', true);
 
   // Display the fields
 ?>
@@ -133,6 +156,15 @@ function custom_fields_testimonial_meta_box_html($post)
         name="job"
         value="<?php echo esc_attr($job); ?>"
         size="50" />
+    </p>
+    <p>
+      <label for="rating">Rating (1-5):</label>
+      <input type="number"
+        id="rating"
+        name="rating"
+        value="<?php echo esc_attr($rating); ?>"
+        min="1"
+        max="5" />
     </p>
   </div>
 <?php
@@ -181,8 +213,14 @@ function custom_fields_save_testimonial_meta($post_id)
     $job = sanitize_text_field($_POST['job']);
     update_post_meta($post_id, '_job', $job);
   }
+  // Save the rating field if present
+  if (isset($_POST['rating'])) {
+    $rating = intval($_POST['rating']);
+    update_post_meta($post_id, '_rating', $rating);
+  }
 }
 add_action('save_post', 'custom_fields_save_testimonial_meta');
+
 /**
  *  Custom admin CSS for the meta box
  */
