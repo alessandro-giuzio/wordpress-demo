@@ -10,15 +10,59 @@
 register_activation_hook(__FILE__, 'custom_fields_activate');
 
 
-// Register a REST API endpoint for testimonial custom fields
-add_action('rest_api_init', 'register_testimonial_custom_fields_endpoint');
-
-function register_testimonial_custom_fields_endpoint()
-{
-  register_rest_route('testimonial/v1', '/fields/(?P<id>\d+)', array(
+// Register REST API route for testimonials
+add_action('rest_api_init', function () {
+  // Route for all testimonials
+  register_rest_route('myplugin/v1', '/testimonials/', array(
     'methods'  => 'GET',
-    'callback' => 'get_testimonial_custom_fields',
+    'callback' => 'myplugin_get_testimonials',
   ));
+  // Route for a single testimonial by ID
+  register_rest_route('myplugin/v1', '/testimonials/(?P<id>\\d+)', array(
+    'methods'  => 'GET',
+    'callback' => 'myplugin_get_single_testimonial',
+  ));
+});
+// Callback function to get a single testimonial by ID
+function myplugin_get_single_testimonial(WP_REST_Request $request)
+{
+  $post_id = $request['id'];
+  $post = get_post($post_id);
+  if (!$post || $post->post_type !== 'testimonial' || $post->post_status !== 'publish') {
+    return new WP_Error('not_found', 'Testimonial not found', array('status' => 404));
+  }
+  return array(
+    'id'      => $post->ID,
+    'title'   => get_the_title($post->ID),
+    'content' => apply_filters('the_content', $post->post_content),
+    'name'    => get_post_meta($post->ID, '_name', true),
+    'company' => get_post_meta($post->ID, '_company', true),
+    'job'     => get_post_meta($post->ID, '_job', true),
+    'rating'  => get_post_meta($post->ID, '_rating', true),
+  );
+}
+// Callback function to get testimonials
+function myplugin_get_testimonials(WP_REST_Request $request)
+{
+  $args = array(
+    'post_type'      => 'testimonial',
+    'posts_per_page' => -1,
+    'post_status'    => 'publish',
+  );
+  $query = new WP_Query($args);
+  $data = array();
+
+  foreach ($query->posts as $post) {
+    $data[] = array(
+      'id'      => $post->ID,
+      'title'   => get_the_title($post->ID),
+      'content' => apply_filters('the_content', $post->post_content),
+      'name'    => get_post_meta($post->ID, '_name', true),
+      'company' => get_post_meta($post->ID, '_company', true),
+      'job'     => get_post_meta($post->ID, '_job', true),
+    );
+  }
+  return $data;
 }
 
 function get_testimonial_custom_fields($data)
@@ -238,3 +282,6 @@ function custom_fields_admin_styles($hook)
   }
 }
 add_action('admin_enqueue_scripts', 'custom_fields_admin_styles');
+
+// Shortcode to display a form to upload images
+add_shortcode('custom_image_upload_form', 'custom_image_upload_form_shortcode');
