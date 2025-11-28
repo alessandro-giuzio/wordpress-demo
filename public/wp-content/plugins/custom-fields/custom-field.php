@@ -285,3 +285,19 @@ add_action('admin_enqueue_scripts', 'custom_fields_admin_styles');
 
 // Shortcode to display a form to upload images
 add_shortcode('custom_image_upload_form', 'custom_image_upload_form_shortcode');
+
+// Shortcode callback function
+function custom_image_upload_form_shortcode()
+{
+  // Start the output buffering
+  ob_start();
+
+  // Form HTML and processing logic
+  echo "<form method='post' enctype='multipart/form-data'>";
+  echo "<label for='custom_image'>Upload an Image:</label>";
+  echo "<input type='file' name='custom_image' />";
+  echo "<input type='submit' value='Upload Image' />";
+  echo "</form>";
+  // Return the HTML
+  return ob_get_clean();
+}
