@@ -1,0 +1,35 @@
+.wp-block-aptex-aptex-announcement {
+	background-color: #d3e9ff;
+	color: #000;
+	padding: 20px;
+	border-radius: 5px;
+}
+
+.aptex-announcement-is-hidden {
+	position: relative;
+	border: 1px dashed #999;
+	border-radius: 0.5rem;
+
+	.wp-block-aptex-aptex-announcement {
+		opacity: 0.4;
+		filter: grayscale(80%);
+	}
+
+	.aptex-disabled {
+		position: absolute;
+		top: 0.5rem;
+		left: 0.5rem;
+		z-index: 1;
+		background: #d3e9ff;
+		color: #000;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0 1rem;
+		border-radius: 0.5rem;
+
+		.aptex-icon--disabled {
+			height: 3rem;
+		}
+	}
+}

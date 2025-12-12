@@ -20,3 +20,19 @@
   border-radius: 4px;
   background: white;
 }
+/**
+ *  Custom admin CSS for the meta box
+ */
+function custom_fields_admin_styles($hook)
+{
+  global $post;
+  // Only load on testimonial post edit screen
+  if ($hook === 'post.php' || $hook === 'post-new.php') {
+    if (isset($post) && $post->post_type === 'testimonial') {
+      wp_enqueue_style(
+        'custom-fields-admin-style',
+        plugin_dir_url(__FILE__) . 'admin-style.css'
+      );
+    }
+  }
+}

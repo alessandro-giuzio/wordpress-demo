@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "aptex/aptex-announcement",
+  "version": "0.1.0",
+  "title": "Announcement",
+  "category": "widgets",
+  "icon": "megaphone",
+  "description": "Publish announcements on your website and hide them when they're no longer needed",
+  "example": {},
+  "supports": {
+    "__experimentalBorder": {
+      "color": true,
+      "radius": true,
+      "style": true,
+      "width": true
+    },
+    "color": {
+      "gradients": true,
+      "link": true,
+      "__experimentalDefaultControls": {
+        "background": true,
+        "text": true
+      }
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "__experimentalDefaultControls": {
+        "margin": false,
+        "padding": false
+      }
+    },
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true,
+      "__experimentalFontFamily": true,
+      "__experimentalTextDecoration": true,
+      "__experimentalFontStyle": true,
+      "__experimentalFontWeight": true,
+      "__experimentalLetterSpacing": true,
+      "__experimentalTextTransform": true,
+      "__experimentalWritingMode": true,
+      "__experimentalDefaultControls": {
+        "fontSize": true
+      }
+    }
+  },
+  "attributes": {
+    "show": {
+      "type": "boolean",
+      "default": true
+    },
+    "hideAfterDateTime": {
+      "type": "string",
+      "default": ""
+    },
+    "showFromDateTime": {
+      "type": "string",
+      "default": ""
+    },
+    "content": {
+      "type": "rich-text",
+      "source": "rich-text",
+      "selector": "p",
+      "role": "content"
+    },
+    "useExpiryDate": {
+      "type": "boolean",
+      "default": false
+    },
+    "useStartDate": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "textdomain": "aptex-announcement",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}

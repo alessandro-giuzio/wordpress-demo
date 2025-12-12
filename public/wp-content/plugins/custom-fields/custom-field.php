@@ -289,6 +289,7 @@ add_shortcode('custom_image_upload_form', 'custom_image_upload_form_shortcode');
 // Shortcode callback function
 function custom_image_upload_form_shortcode()
 {
+  echo "test";
   // Start the output buffering
   ob_start();
 

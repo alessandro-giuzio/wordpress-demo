@@ -1,0 +1,11 @@
+<?php
+function custom_fields_admin_styles($hook) {
+    global $post;
+    if (($hook === 'post.php' || $hook === 'post-new.php') && isset($post) && $post->post_type === 'testimonial') {
+        wp_enqueue_style(
+            'custom-fields-admin-style',
+            plugin_dir_url(__FILE__) . '../assets/css/admin-style.css'
+        );
+    }
+}
+add_action('admin_enqueue_scripts', 'custom_fields_admin_styles');

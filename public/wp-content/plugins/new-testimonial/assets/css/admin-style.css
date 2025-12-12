@@ -1,0 +1,12 @@
+/* Admin styles for testimonial meta box */
+#custom_fields_testimonial_meta_box label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+#custom_fields_testimonial_meta_box input[type='text'],
+#custom_fields_testimonial_meta_box input[type='number'] {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 10px;
+}
