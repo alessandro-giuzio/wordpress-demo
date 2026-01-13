@@ -32,7 +32,7 @@ class Expiration_Manager_Activator {
 
 		// 2) Schedule our cron check (runs hourly)
 		if (!wp_next_scheduled('expiration_manager_cron_check')) {
-			wp_schedule_event(time(), 'hourly', 'expiration_manager_cron_check');
+			wp_schedule_event(time(), 'daily', 'expiration_manager_cron_check');
 		}
 	}
 

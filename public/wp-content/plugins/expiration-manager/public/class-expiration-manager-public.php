@@ -99,5 +99,54 @@ class Expiration_Manager_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/expiration-manager-public.js', array( 'jquery' ), $this->version, false );
 
 	}
+	/**
+	 * Prepend an "expired" notice banner above the content when a post/page is expired
+	 * and the selected action is "notice".
+	 *
+	 * @param string $content The post content.
+	 * @return string
+	 */
+	public function maybe_prepend_expiration_notice($content)
+	{
+
+		// Only on single posts/pages (not archives)
+		if (!is_singular(array('post', 'page'))) {
+			return $content;
+		}
+
+		$post_id = get_the_ID();
+		if (!$post_id) {
+			return $content;
+		}
+
+		// 1) Get expiration timestamp
+		$expiration_ts = (int) get_post_meta($post_id, '_em_expiration_date', true);
+		if (!$expiration_ts) {
+			return $content;
+		}
+
+		// 2) Not expired yet
+		if (time() < $expiration_ts) {
+			return $content;
+		}
+
+		// 3) Check action
+		$action = get_post_meta($post_id, '_em_expiration_action', true);
+		if ('notice' !== $action) {
+			return $content;
+		}
+
+		// 4) Get banner message: per-post custom notice OR global default option
+		$custom_notice = get_post_meta($post_id, '_em_expiration_notice', true);
+		$default_notice = get_option('expiration_manager_default_notice', 'This content is outdated.');
+		$message = $custom_notice ? $custom_notice : $default_notice;
+
+		// 5) Build banner HTML (simple inline style for now)
+		$banner = '<div class="em-expired-notice" role="status" aria-live="polite" style="padding:10px;border:1px solid #f0c36d;background:#fff7e6;margin:0 0 16px 0;">';
+		$banner .= esc_html($message);
+		$banner .= '</div>';
+
+		return $banner . $content;
+	}
 
 }

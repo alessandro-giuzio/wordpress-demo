@@ -184,5 +184,72 @@ class Expiration_Manager_Admin
 			update_post_meta($post_id, '_em_expiration_notice', $notice);
 		}
 	}
+	/* -------------------------------------------------------------------------
+	 * SETTINGS PAGE: Global default notice text
+	 * Option name: expiration_manager_default_notice
+	 * ------------------------------------------------------------------------- */
+
+	public function add_settings_page()
+	{
+		add_options_page(
+			'Expiration Manager',            // Page title
+			'Expiration Manager',            // Menu title
+			'manage_options',                // Capability
+			'expiration-manager',            // Menu slug
+			array($this, 'render_settings_page') // Callback
+		);
+	}
+
+	public function register_settings()
+	{
+		register_setting(
+			'expiration_manager_settings',        // Settings group
+			'expiration_manager_default_notice',  // Option name
+			array(
+				'type' => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+				'default' => 'This content is outdated.',
+			)
+		);
+
+		add_settings_section(
+			'expiration_manager_section_main',
+			'Global Notice',
+			'__return_false',
+			'expiration-manager'
+		);
+
+		add_settings_field(
+			'expiration_manager_default_notice_field',
+			'Default expired notice text',
+			array($this, 'render_default_notice_field'),
+			'expiration-manager',
+			'expiration_manager_section_main'
+		);
+	}
+
+	public function render_default_notice_field()
+	{
+		$value = get_option('expiration_manager_default_notice', 'This content is outdated.');
+		echo '<textarea name="expiration_manager_default_notice" rows="4" style="width:100%;">' . esc_textarea($value) . '</textarea>';
+		echo '<p style="margin:6px 0 0; font-size:12px; opacity:.8;">Used when a post has no custom notice.</p>';
+	}
+
+	public function render_settings_page()
+	{
+		?>
+		<div class="wrap">
+			<h1>Expiration Manager</h1>
+
+			<form method="post" action="options.php">
+				<?php
+				settings_fields('expiration_manager_settings');
+				do_settings_sections('expiration-manager');
+				submit_button();
+				?>
+			</form>
+		</div>
+		<?php
+	}
 
 }
