@@ -10,17 +10,8 @@
  * @subpackage Expiration_Manager/admin
  */
 
-/**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    Expiration_Manager
- * @subpackage Expiration_Manager/admin
- * @author     Alessandro <test@mail.com>
- */
-class Expiration_Manager_Admin {
+class Expiration_Manager_Admin
+{
 
 	/**
 	 * The ID of this plugin.
@@ -44,14 +35,13 @@ class Expiration_Manager_Admin {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param    string $plugin_name The name of this plugin.
+	 * @param    string $version     The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
-
+	public function __construct($plugin_name, $version)
+	{
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,22 +49,15 @@ class Expiration_Manager_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Expiration_Manager_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Expiration_Manager_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/expiration-manager-admin.css', array(), $this->version, 'all' );
-
+	public function enqueue_styles()
+	{
+		wp_enqueue_style(
+			$this->plugin_name,
+			plugin_dir_url(__FILE__) . 'css/expiration-manager-admin.css',
+			array(),
+			$this->version,
+			'all'
+		);
 	}
 
 	/**
@@ -82,22 +65,124 @@ class Expiration_Manager_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
+		wp_enqueue_script(
+			$this->plugin_name,
+			plugin_dir_url(__FILE__) . 'js/expiration-manager-admin.js',
+			array('jquery'),
+			$this->version,
+			false
+		);
+	}
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Expiration_Manager_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Expiration_Manager_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+	/* -------------------------------------------------------------------------
+	 * POINT 1: Data per post (Metabox)
+	 * -------------------------------------------------------------------------
+	 * Post meta keys we store:
+	 * - _em_expiration_date   (timestamp int)
+	 * - _em_expiration_action (notice | unpublish)
+	 * - _em_expiration_notice (optional text)
+	 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/expiration-manager-admin.js', array( 'jquery' ), $this->version, false );
+	/**
+	 * Add the metabox to posts and pages.
+	 */
+	public function add_expiration_metabox()
+	{
+		add_meta_box(
+			'em_expiration',
+			'Expiration',
+			array($this, 'render_expiration_metabox'),
+			array('post', 'page'),
+			'side',
+			'default'
+		);
+	}
 
+	/**
+	 * Metabox HTML.
+	 */
+	public function render_expiration_metabox($post)
+	{
+		wp_nonce_field('em_save_expiration', 'em_nonce');
+
+		$date = get_post_meta($post->ID, '_em_expiration_date', true);
+		$action = get_post_meta($post->ID, '_em_expiration_action', true);
+		$notice = get_post_meta($post->ID, '_em_expiration_notice', true);
+
+		// Timestamp -> YYYY-MM-DD for <input type="date">
+		$date_value = $date ? date('Y-m-d', (int) $date) : '';
+
+		if (empty($action)) {
+			$action = 'notice';
+		}
+		?>
+		<p>
+			<label for="em_date">Expire on</label><br>
+			<input id="em_date" type="date" name="em_date" value="<?php echo esc_attr($date_value); ?>" style="width:100%;" />
+		</p>
+
+		<p>
+			<label for="em_action">When expired</label><br>
+			<select id="em_action" name="em_action" style="width:100%;">
+				<option value="notice" <?php selected($action, 'notice'); ?>>Show notice</option>
+				<option value="unpublish" <?php selected($action, 'unpublish'); ?>>Unpublish</option>
+			</select>
+		</p>
+
+		<p>
+			<label for="em_notice">Custom notice (optional)</label><br>
+			<textarea id="em_notice" name="em_notice" rows="3"
+				style="width:100%;"><?php echo esc_textarea($notice); ?></textarea>
+		</p>
+
+		<p style="font-size:12px;opacity:.8;margin:0;">
+			If empty, the plugin will use the global default notice text.
+		</p>
+		<?php
+	}
+
+	/**
+	 * Save the metabox values.
+	 */
+	public function save_expiration_metabox($post_id)
+	{
+
+		// Security
+		if (!isset($_POST['em_nonce'])) {
+			return;
+		}
+		if (!wp_verify_nonce($_POST['em_nonce'], 'em_save_expiration')) {
+			return;
+		}
+		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+			return;
+		}
+		if (!current_user_can('edit_post', $post_id)) {
+			return;
+		}
+
+		// 1) Expiration date -> store as end-of-day timestamp
+		if (!empty($_POST['em_date'])) {
+			$date = sanitize_text_field($_POST['em_date']); // YYYY-MM-DD
+			$ts = strtotime($date . ' 23:59:59');
+			update_post_meta($post_id, '_em_expiration_date', (int) $ts);
+		} else {
+			delete_post_meta($post_id, '_em_expiration_date');
+		}
+
+		// 2) Action
+		$action = !empty($_POST['em_action']) ? sanitize_text_field($_POST['em_action']) : 'notice';
+		update_post_meta($post_id, '_em_expiration_action', $action);
+
+		// 3) Optional custom notice
+		$notice = isset($_POST['em_notice']) ? sanitize_textarea_field($_POST['em_notice']) : '';
+		if ('' === $notice) {
+			delete_post_meta($post_id, '_em_expiration_notice');
+		} else {
+			update_post_meta($post_id, '_em_expiration_notice', $notice);
+		}
 	}
 
 }

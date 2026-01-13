@@ -22,15 +22,18 @@
  */
 class Expiration_Manager_Activator {
 
-	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
-	 */
-	public static function activate() {
+	public static function activate()
+	{
 
+		// 1) Global default text (only add the first time)
+		if (false === get_option('expiration_manager_default_notice')) {
+			add_option('expiration_manager_default_notice', 'This content is outdated.');
+		}
+
+		// 2) Schedule our cron check (runs hourly)
+		if (!wp_next_scheduled('expiration_manager_cron_check')) {
+			wp_schedule_event(time(), 'hourly', 'expiration_manager_cron_check');
+		}
 	}
 
 }
